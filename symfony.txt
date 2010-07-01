@@ -131,6 +131,7 @@
         - filterByAuthor(Doctrine_Query $q, Author $author) # Уточнить запрос с фильтром по автору
         - withAuthor(Doctrine_Query $q)                     # Сделать выборку с джойном по авторам
 
+
  7. БД
  -----
     7.1 Таблицам даем название во множественном числе:
@@ -146,3 +147,31 @@
         До бигинта integer(8) редко кто доживает, а кто доживает, тот понимает, что это уже float.
 
     7.3 Первичные ключи не объявляем в схеме там, где это возможно.
+
+
+ 8. Миграции
+ -----------
+ Подробно см. http://habrahabr.ru/blogs/symfony/97940/
+
+    8.1 Миграции должны быть атомарными. Одна правка — одна миграция.
+        ОБЯЗАТЕЛЬНО выносить все правки FK в отдельную миграцию.
+
+    8.2 Названия
+        В названии файла и класса миграции указываем номер версии, модель, действие и описание:
+
+            001_Article_CreateTable.php
+            002_Article_AddColumn_AuthorId.php
+            003_Article_AddFk_Authors.php
+            004_Article_UpdateColumn_Title.php
+            005_Article_DropTable.php
+
+                класс:
+            class Migration001_Article_CreateTable
+
+    8.3 Если есть возможность, используем короткую запись миграций вместе с migrate().
+        См. http://www.doctrine-project.org/projects/orm/1.2/docs/manual/migrations/en#writing-migration-classes:up/down-automation
+
+    8.4 Всегда делать возможность откатить миграцию.
+
+    8.5 Миграции данных пишем ТОЛЬКО в raw sql и не используем модели.
+        Пишем в pre/post хуках.
