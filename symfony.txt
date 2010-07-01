@@ -1,0 +1,148 @@
+Требования/соглашения для работы с symfony
+================================================================================
+
+ 1. Общее
+ --------
+    1.1 Для собственных классов ставим префикс "my"
+        Например: mySuperClass или myWidgetFormCustomInput
+
+    1.2 Генерация html ТОЛЬКО в шаблонах
+
+    1.3 Не использовать sfContext::getInstance()
+
+
+ 2. Конфиг
+ ---------
+    2.1 ИСПОЛЬЗОВАТЬ конфиг, а не хардкодить в разных местах
+
+    2.2 Использовать каскады конфигурации: plugin -> project -> app -> module
+
+    2.3 Использовать возможности конфигурирования для разных ENV (prod, dev, test)
+
+    2.4 Всегда включаем защиту от csrf и xss. Отдельные классы, например DateTime,
+        можно добавить в исключение:
+            sfOutputEscaper::markClassesAsSafe(array(
+                'DateTime',
+            ));
+
+
+ 3. Роутинг
+ ----------
+    3.1 Не использовать дефолты в правилах для модуля и экшена. Всегда прописывать явно
+        или указывать перечисление в requirements.
+
+        Так НЕ надо делать:
+            article:
+              url:    /article/:action
+              params: { module: article }
+
+            default:
+              url:   /:module/:action/*
+
+    3.2 Если мы используем частичный RouteCollection, тогда явно указываем, что мы используем:
+
+            article:
+              class: sfDoctrineRouteCollection
+              options:
+                module: article
+                model:  Article
+                actions: [new, create, edit, update, delete]
+
+    3.3 Используем sfDoctrineRoute и sfDoctrineRouteCollection, чтобы в контроллере
+        выбирать объект через
+            $this->getRoute()->getObject()
+        Фреймворк автоматически выкинет 404 ошибку, если объект не будет найден.
+
+    3.4 Для контроля за методами запроса используем requirements:
+            requirements:
+              sf_method: [get, post]
+              sf_method: post
+              sf_method: put
+              sf_method: delete
+
+    3.5 Используем requirements, чтобы лимитировать sf_format:
+            requirements:
+              sf_format: html
+              sf_format: (?:html|xml|json)
+        В противном случае symfony выкинет исключение, если не найдет шаблон для указанного формата,
+        который мы не поддерживаем. 404 лучше чем 500.
+
+
+ 4. Контроллер
+ -------------
+    4.1 В контроллерах не пришем запросы - по максимуму выносим в таблицы и в фильтры.
+
+    4.2 Используем всегда, когда это возможно: $this->getRoute()->getObject()
+
+    4.3 phpdoc для класса и каждого метода. Так наглядно, чисто и удобно.
+        /**
+         * Список статей
+         */
+        public function executeIndex(sfRequest $request)
+
+
+ 5. Шаблоны
+ ----------
+    5.1 Шаблоны не должны содержать никакой логики.
+
+    5.2 Использовать хелперы.
+        Можно сделать себе подсказку: grep 'function' ./lib/vendor/symfony/lib/helper/*
+
+    5.3 Ссылки и урлы выводим ТОЛЬКО через хелперы и ТОЛЬКО с явным указанием правила маршрутизации:
+        OK:
+            url_for('article_edit', $article);
+            url_for('article_edit', array('id' => $article->getId());
+        NO:
+            url_for('article/edit', $article);
+            url_for('@article_edit?id='.$article->getId());
+
+        Бывают случаи, когда стоит использовать именно @article_edit?id=...
+        Но эти случаи довольно редки и следует стремиться не использовать такую форму записи.
+
+        Routing.yml - единственное место, где фигурируют реальные URL.
+        В тестах мы используем $this->generateUrl(), см. sfPHPUnitFunctionalTestCase
+
+    5.4 Пишем свои хелперы, чтобы не копипастить.
+
+    5.5 Используем только альтернативный синтаксис для PHP:
+            <?php foreach ($list as $item): ?>
+        Никаких фигурных скобок (с учетом оправданных исключений).
+
+    5.6 В заголовке шаблона указываем phpdoc с описанием и списком ожидаемых переменных:
+        <?php
+        /**
+         * Список статей
+         *
+         * @param  array Article $articles
+         */
+        ?>
+
+    5.7 Все стили только в css.
+
+
+ 6. Модель/Таблицы
+ -----------------
+    6.1 Желательно, чтобы в таблицах методы возвращали Doctrine_Query,
+        чтобы контроллер мог самостоятельно выбрать способ гидрации.
+
+    6.2 Названия табличных методов:
+        - queryFindListByCustomCriteria(...)                # Выбрать список
+        - findOneByCustomCriteria(...)                      # Выбрать один объект
+        - filterByAuthor(Doctrine_Query $q, Author $author) # Уточнить запрос с фильтром по автору
+        - withAuthor(Doctrine_Query $q)                     # Сделать выборку с джойном по авторам
+
+ 7. БД
+ -----
+    7.1 Таблицам даем название во множественном числе:
+        Например:
+            - articles
+            - article_tags
+
+    7.2 Для первичных ключей используем по смыслу:
+            type: integer(4), unsigned: false
+            type: integer(3)
+            type: integer(2)
+            type: integer(1)
+        До бигинта integer(8) редко кто доживает, а кто доживает, тот понимает, что это уже float.
+
+    7.3 Первичные ключи не объявляем в схеме там, где это возможно.
