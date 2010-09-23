@@ -80,7 +80,7 @@ Git
   git remote prune origin     # Убрать ссылки на удаленные ветки
   git co master
   git merge origin/master
-  git submodume update --init # Обновить ссылки на субмодули
+  git submodule update --init # Обновить ссылки на субмодули
 
 
 Рабочий процесс
@@ -326,10 +326,16 @@ Stash
 
 Субмодули
 ---------
-  см. git help submodute
+  см. git help submodule
+
+  # Добавить субмодуль
+  git submodule add http://github.com/maxim-oleinik/symfony-dev-rules ./doc/rules
+  # Чтобы коммитить в субмодуль, надо изменить конфиг ./doc/rules/.git/config
+  url = git@github.com:/maxim-oleinik/symfony-dev-rules.git
 
   # Обновить ссылки на субмодули
   git submodule update
+  git submodule update --init
 
   # Выполнить указанную команду для каждого субмодуля
   git submodule foreach <command>
@@ -340,6 +346,9 @@ Stash
     2. Удалить из .git/config.
     3. Удалить файлы git rm --cached path/to/submodule
     4. Закоммитить результат
+
+  # Обновить конфиг проекта, при переключении модуля на другой репозитарий
+  git submodule sync
 
 
 Прочее
