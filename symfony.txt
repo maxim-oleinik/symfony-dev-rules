@@ -65,10 +65,12 @@
 
     3.4 Для контроля за методами запроса используем requirements:
             requirements:
-              sf_method: [get, post]
+              sf_method: [get, head]
               sf_method: post
               sf_method: put
               sf_method: delete
+        Для "get" запросов желательно оставлять возможность "head" запросов.
+        Поисковики все-таки.
 
     3.5 Используем requirements, чтобы лимитировать sf_format:
             requirements:
