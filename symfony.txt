@@ -69,8 +69,7 @@
               sf_method: post
               sf_method: put
               sf_method: delete
-        Для "get" запросов желательно оставлять возможность "head" запросов.
-        Поисковики все-таки.
+        Для "get" запросов желательно оставлять возможность "head" запросов. Поисковики все-таки.
 
     3.5 Используем requirements, чтобы лимитировать sf_format:
             requirements:
@@ -91,6 +90,9 @@
          * Список статей
          */
         public function executeIndex(sfRequest $request)
+
+    4.4 Контроллеры не должны содержать бизнес-логики, вычислений. Все выносить в модели
+        и отдельные классы. Длинный метод - индикатор перегрузки.
 
 
  5. Шаблоны
@@ -147,11 +149,8 @@
         чтобы контроллер или другой клиент мог самостоятельно выбрать способ гидрации
         или уточнить запрос.
 
-    6.2 Названия табличных методов:
-        - queryFindListByCustomCriteria(...)                # Выбрать список
-        - findOneByCustomCriteria(...)                      # Выбрать один объект
-        - filterByAuthor(Doctrine_Query $q, Author $author) # Уточнить запрос с фильтром по автору
-        - withAuthor(Doctrine_Query $q)                     # Сделать выборку с джойном по авторам
+    А еще лучше читаем и делаем:
+    http://prendreuncafe.com/blog/post/Optimize-your-Doctrine-Workflow-with-Specialized-Queries
 
 
  7. БД/schema.yml
@@ -175,8 +174,8 @@
     7.3 Для первичных ключей используем по смыслу:
             type: integer(4), unsigned: false
             type: integer(3)
-            type: integer(2)
-            type: integer(1)
+            type: integer(2) # +-32767
+            type: integer(1) # +-127
         До бигинта integer(8) редко кто доживает, а кто доживает, тот понимает, что это уже float.
 
     7.4 Первичные ключи не объявляем в схеме там, где это возможно.
@@ -202,12 +201,12 @@
             005_Article_DropTable.php
 
                 класс:
-            class Migration001_Article_CreateTable
+            class Migration_Article_CreateTable
 
     8.3 Если есть возможность, используем короткую запись миграций вместе с migrate().
         См. http://www.doctrine-project.org/projects/orm/1.2/docs/manual/migrations/en#writing-migration-classes:up/down-automation
 
-    8.4 Всегда делать возможность откатить миграцию.
+    8.4 ВСЕГДА делаем возможность откатить миграцию.
 
     8.5 Миграции данных пишем ТОЛЬКО в raw sql и не используем модели.
         Пишем в pre/post хуках.
@@ -220,7 +219,6 @@ TODO
     - Указывать AppNamе: app/lib/myAdminUser.php
     - BaseClass, ArticleQuery (myAdminArticleQuery)
 - В первую очередь класть классы в app/lib, а потом выносить в глобальный lib при первой необходимости.
-- Doctrine query: http://prendreuncafe.com/blog/post/Optimize-your-Doctrine-Workflow-with-Specialized-Queries
 - schema.yml: Всегда указывать relations: autoComplete: false, и включать при первой необходимости.
 - i18N
 - генерация админки
