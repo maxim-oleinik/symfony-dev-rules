@@ -43,7 +43,7 @@ Git
             br = branch
             co = checkout
             di = diff
-            plog = log --pretty=format:'%h %Cblue%cn %Creset%cr %Cgreen%s'
+            plog = log --follow --pretty=format:'%h %Cblue%cn %Creset%cr %Cgreen%s'
             # можно указать любые свои алиасы к разным командам
 
         [core]
@@ -348,6 +348,7 @@ Stash
     git log -S'foo()'     # commits which add or remove any file data
                           # matching the string 'foo()'
     ----
+    git log --follow      # Показывать историю переименований файлов
     git log --no-merges   # Не показывать мерджи
     git log -n 5 -p --reverse FILE  # Посмотреть последние 5 дифов указанного файла
 
