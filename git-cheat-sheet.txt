@@ -101,6 +101,10 @@ Git
   git add .       # Добавить ВСЁ в текущей директории
   git add -p      # Добавлять фрагментами дифа, просматривая каждое изменение
                   # ОЧЕНЬ рекомендую использовать постоянно
+  git diff -U0 | grepdiff 'regex search' --output-matching=hunk | git apply --cached --unidiff-zero
+  # Закоммитить только те фрагменты, которые попадают под регулярку
+  # I use -U0 on the diff to avoid getting unrelated changes. You might want to adjust this value to suite your situation.
+
   git add -N .    # Добавить все "новые" файлы под контроль без содержимого (только путь),
                   # т.е. git покажет содержимое этих файлов в дифе
 
